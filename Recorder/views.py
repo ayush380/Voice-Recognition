@@ -1,5 +1,6 @@
 import errno
-
+import time
+from flask import send_file
 from django.shortcuts import render
 from django.http import HttpResponse
 import os
@@ -17,19 +18,19 @@ def home(request):
 
 @api_view(['GET', 'POST'])
 def blah(request):
-    print(request.body)
+    # print(request.body)
     print("in Blah")
     audio_data = request.FILES.get('audio_data')
-    if not os.path.exists(os.path.dirname('./Audio/file.wav')):
+    if not os.path.exists(os.path.dirname('./Audio/incoming.wav')):
         try:
-            os.makedirs(os.path.dirname('./Audio/file.wav'))
+            os.makedirs(os.path.dirname('./Audio/incoming.wav'))
         except OSError as exc:  # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
     # f = open('./Audio/file.wav', 'wb')
     print(type(audio_data))
     obj = wave.open(audio_data, 'r')
-    audio = wave.open('./Audio/file.wav', 'wb')
+    audio = wave.open('./Audio/incoming.wav', 'wb')
 
     audio.setnchannels(obj.getnchannels())
     audio.setnframes(obj.getnframes())
@@ -39,7 +40,22 @@ def blah(request):
     audio.writeframes(blob)
 
     print("opening file")
+    #
+    # clientAudio=wave.open('./Audio/file.wav', 'rb');
+    # from STT import  assistant
+    # # assistant.takecommand('./Audio/file.wav')
+    # return send_file(
+    #      './Audio/file.wav',
+    #      mimetype="audio/wav",
+    #      as_attachment=True,
+    #      attachment_filename="file.wav")
 
-    from STT import  assistant
-    assistant.takecommand('./Audio/file.wav')
-    return HttpResponse('audio received')
+    fname = "./Audio/response.wav"
+    f = open(fname, "rb")
+    response = HttpResponse()
+    response.write(f.read())
+    response['Content-Type'] = 'audio/wav'
+    response['Content-Length'] = os.path.getsize(fname)
+    # logging.debug("worker thread checking in")
+    time.sleep(2)
+    return response

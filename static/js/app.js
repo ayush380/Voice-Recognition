@@ -176,11 +176,21 @@ function createDownloadLink(blob) {
 }
 function sendToServer(blob,filename,event){
 		  var xhr=new XMLHttpRequest();
-		  xhr.onload=function(e) {
-		      if(this.readyState === 4) {
-		          console.log("Server returned: ",e.target.responseText);
-		      }
-		  };
+		  xhr.responseType='blob';
+
+		  xhr.onload = function(e) {
+		  var audio = document.getElementById('myAudioElement') || new Audio();
+            if (this.readyState == 4 && this.status == 200) {
+                 var blob = new Blob([xhr.response], {type: 'audio/wav'});
+              var objectUrl = URL.createObjectURL(blob);
+              audio.src = objectUrl;
+              // Release resource when it's loaded
+              audio.onload = function(evt) {
+                URL.revokeObjectURL(objectUrl);
+              };
+              audio.play();
+            }
+          }
 		  var fd=new FormData();
 		  fd.append("audio_data",blob, filename);
 		  xhr.open("POST","/Blah/",true);
