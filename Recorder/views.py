@@ -50,7 +50,7 @@ def blah(request):
     #      as_attachment=True,
     #      attachment_filename="file.wav")
 
-    fname = "./Audio/response.wav"
+    fname = "./Audio/incoming.wav"
     f = open(fname, "rb")
     response = HttpResponse()
     response.write(f.read())
